@@ -15,22 +15,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// JWTSecretKey is a secret key used to sign JWT tokens
 var JWTSecretKey = []byte("shayan")
 
-// GenerateJWT generates a JWT token for a given user
 func GenerateJWT(user User) (string, error) {
-	// Set token claims
 	claims := jwt.MapClaims{
 		"id":       user.ID,
 		"username": user.Username,
-		"exp":      time.Now().Add(time.Hour * 24).Unix(), // Token expires in 24 hours
+		"exp":      time.Now().Add(time.Hour * 24).Unix(),
 	}
 
 	// Create token with claims
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	// Sign token with secret key and get the complete encoded token as a string
 	tokenString, err := token.SignedString(JWTSecretKey)
 	if err != nil {
 		return "", err
@@ -38,8 +34,6 @@ func GenerateJWT(user User) (string, error) {
 
 	return tokenString, nil
 }
-
-// Middleware function to validate JWT tokens
 func AuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Get JWT token from Authorization header
@@ -50,7 +44,6 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		// Parse and validate JWT token
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return JWTSecretKey, nil
 		})
@@ -59,6 +52,22 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+
+		claims, ok := token.Claims.(jwt.MapClaims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+		userID, ok := claims["id"].(string)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
+
+		// Pass user information to next handler
+		c.Set("userID", userID)
 
 		c.Next()
 	}
@@ -97,7 +106,7 @@ func main() {
 	// Add endpoints for user registration and login
 	r.POST("/register", registerUser)
 	r.POST("/login", loginUser)
-	r.GET("/protected", protectedEndpoint)
+	r.GET("/protected", AuthMiddleware(), protectedEndpoint)
 
 	// Run the Gin server
 	r.Run(":8080")
