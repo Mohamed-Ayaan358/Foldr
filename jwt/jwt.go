@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"Foldr/models"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -40,24 +41,23 @@ func AuthMiddleware() gin.HandlerFunc {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return JWTSecretKey, nil
 		})
+		fmt.Print(token)
 		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			fmt.Print(err)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized-1"})
 			c.Abort()
 			return
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			fmt.Print(err)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized-2"})
 			c.Abort()
 			return
 		}
-		userID, ok := claims["id"].(string)
-		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-			c.Abort()
-			return
-		}
+		userID := claims["Username"].(string)
+		// Need to check if the userID token is in the database by making a call to the database function?
 
 		c.Set("userID", userID)
 
