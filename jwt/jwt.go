@@ -41,9 +41,9 @@ func AuthMiddleware() gin.HandlerFunc {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			return JWTSecretKey, nil
 		})
-		fmt.Print(token)
+		// fmt.Print(token)
 		if err != nil || !token.Valid {
-			fmt.Print(err)
+			// fmt.Print(err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized-1"})
 			c.Abort()
 			return
@@ -51,15 +51,23 @@ func AuthMiddleware() gin.HandlerFunc {
 
 		claims, ok := token.Claims.(jwt.MapClaims)
 		if !ok {
-			fmt.Print(err)
+			// fmt.Print(err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized-2"})
 			c.Abort()
 			return
 		}
-		userID := claims["Username"].(string)
-		// Need to check if the userID token is in the database by making a call to the database function?
+		userID, ok := claims["id"].(string)
+		// fmt.Print(claims["username"].(string))
+		// fmt.Println(userID)
+		// Replace with checking for id here
+		if !ok {
+			fmt.Print(err)
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized-3"})
+			c.Abort()
+			return
+		}
 
-		c.Set("userID", userID)
+		c.Set("user", userID)
 
 		c.Next()
 	}
