@@ -2,11 +2,14 @@
 
 ## Stage 1: Authentication and Profile Creation
 
-- Implement authentication system.
-- Allow users to create profiles.
+- Implement authentication system. [x]
+- Allow users to create profiles. [x]
+- Need to make a function for universal hashing in order to be used for password and paths 
 
 ## Stage 2: Backend System for Folder Creation
 
+- Allow particular users to set up folders via a method and store their paths along with a name for that path.
+- Hash paths and then make a QR out of it
 - Develop a backend system to create folders.
 - Store folder information in a database or filesystem.
 - Ensure folders are accessible to users.
