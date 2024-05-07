@@ -56,10 +56,8 @@ func AuthMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-		userID, ok := claims["id"].(string)
-		// fmt.Print(claims["username"].(string))
-		// fmt.Println(userID)
-		// Replace with checking for id here
+		userName, ok := claims["username"].(string)
+
 		if !ok {
 			fmt.Print(err)
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized-3"})
@@ -67,7 +65,7 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		c.Set("user", userID)
+		c.Set("username", userName)
 
 		c.Next()
 	}
